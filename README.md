@@ -3,7 +3,7 @@ Project been made in order to apply agile methods, requirements engineering and 
 
 ## :dart: First Use Case Diagram
 
-[](img/first_use_case_diagram.jpg)
+<center><img width="800" src="Img/first_use_case_diagram.png"></center>
 
 ## :bookmark_tabs: References
 
