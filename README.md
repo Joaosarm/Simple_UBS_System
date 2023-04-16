@@ -2,9 +2,9 @@
 
 
 
-:us: Simple UBS Web System: Project been made aiming to apply agile methods, requirements engineering and others subjects related to the course of Projects and Software Engineering of my Computer Engineed Degree taught at the Universidade Federal do Rio Grande do Norte.
+![eua](https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Flag_of_the_United_States.svg/22px-Flag_of_the_United_States.svg.png) Simple UBS Web System: Project been made aiming to apply agile methods, requirements engineering and others subjects related to the course of Projects and Software Engineering of my Computer Engineed Degree taught at the Universidade Federal do Rio Grande do Norte.
 
-:br: Sistema UBS Web Simples: Projeto realizado visando a aplicação de métodos ágeis, engenharia de requisitos e outras disciplinas relacionadas ao curso de Projetos e Engenharia de Software do curso de Engenharia de Computação da Universidade Federal do Rio Grande do Norte.
+![brasil](https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Flag_of_Brazil.svg/22px-Flag_of_Brazil.svg.png) Sistema UBS Web Simples: Projeto realizado visando a aplicação de métodos ágeis, engenharia de requisitos e outras disciplinas relacionadas ao curso de Projetos e Engenharia de Software do curso de Engenharia de Computação da Universidade Federal do Rio Grande do Norte.
 
 
 ## Requisitos
@@ -26,7 +26,7 @@
 *5 - Sistema informa ao paciente uma senha de solicitação* <br>
 *6 - Sistema notifica recepção de sobre uma nova solicitação de atendimento.* <br>
 
-> Recepção
+> Recepção :technologist:
 
 ***Chamar Paciente*** <br>
 ***Ator:*** *Recepção* <br>
@@ -53,7 +53,7 @@
 7 - Sistema move paciente para lista de não atendidos (Atualiza Status).<br>
 8 - Sistema notifica Enfermagem sobre novo paciente.*<br>
 
-> Enfermagem
+> Enfermagem :health_worker:
 
 ***Chamar Paciente na lista de Não Atendidos**<br>
 **Ator:** Enfermagem<br>
@@ -87,7 +87,7 @@
 3 - Sistema encaminha paciente para lista de pacientes “Em atendimento” (atualiza status)<br>
 4 - Sistema notificar medicina sobre novo paciente “Em atendimento”*<br>
 
-> Medicina 
+> Medicina :medical_symbol:
 
 ***Chamar paciente na Lista de “Em atendimento”**<br>
 **Ator:** Medicina<br>
