@@ -14,7 +14,7 @@
 <center><img width="800" src="Img/first_use_case_diagram.png"></center>
 
 #### :pencil: Descrição dos Casos de Uso
-> Paciente
+> Paciente :raising_hand:
 
 ***Solicitar atendimento*** <br>
 ***Ator:*** *Paciente* <br>
