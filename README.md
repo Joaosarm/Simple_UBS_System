@@ -1,4 +1,4 @@
-# :stethoscope: Sismeta Web Simple para uma UBS :computer:
+# :stethoscope: Sistema Web Simple para uma UBS :computer:
 
 
 
