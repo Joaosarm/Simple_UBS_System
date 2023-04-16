@@ -26,6 +26,7 @@
 *4 - Paciente efetua conclusão da solicitação.* <br>
 *5 - Sistema informa ao paciente uma senha de solicitação* <br>
 *6 - Sistema notifica recepção de sobre uma nova solicitação de atendimento.* <br>
+
 ---
 > Recepção :technologist:
 
@@ -53,6 +54,7 @@
 6 - Recepção conclui cadastramento.<br>
 7 - Sistema move paciente para lista de não atendidos (Atualiza Status).<br>
 8 - Sistema notifica Enfermagem sobre novo paciente.*<br>
+
 ---
 > Enfermagem :health_worker:
 
@@ -87,6 +89,7 @@
 2 - Sistema pergunta enfermagem setor de atendimento do paciente<br>
 3 - Sistema encaminha paciente para lista de pacientes “Em atendimento” (atualiza status)<br>
 4 - Sistema notificar medicina sobre novo paciente “Em atendimento”*<br>
+
 ---
 > Medicina :medical_symbol:
 
@@ -118,6 +121,7 @@
 3 - O sistema atualiza o status do paciente para "Atendimento concluído".<br>
 **Extensões:**<br>
 1a - Caso o médico identifique a necessidade de prescrever medicamentos ao paciente, ele pode selecionar a opção "Prescrever medicamentos" e inserir as informações correspondentes.*
+
 ---
 > Todos
 
