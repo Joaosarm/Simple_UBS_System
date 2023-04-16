@@ -16,9 +16,9 @@
 #### :pencil: Descrição dos Casos de Uso
 > Paciente
 
-***Solicitar atendimento***
-***Ator:*** *Paciente*
-***Fluxo normal***:
+***Solicitar atendimento*** <br>
+***Ator:*** *Paciente* <br>
+***Fluxo normal***: <br>
 *1 - Paciente inicia nova solicitação de atendimento ao chegar na UBS, via painel central.*
 *2 - Sistema pergunta ao paciente qual área relacionada com sua queixa.*
 *3 - Sistema pergunta qual tipo de preferência de atendimento do paciente.*
