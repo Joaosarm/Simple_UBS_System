@@ -31,7 +31,7 @@
 > Recepção :technologist:
 
 ***Chamar Paciente*** <br>
-**Pré-Condição:** *Autentica Profissional*
+**Pré-Condição:** *Autentica Profissional* <br>
 ***Ator:*** *Recepção* <br>
 ***Fluxo normal:*** <br>
 *1 - Sistema informa fila de solicitações a recepção*<br>
@@ -44,7 +44,7 @@
 
 
 ***Realizar Cadastro de Paciente**<br>
-**Pré-Condição:** *Autentica Profissional*
+**Pré-Condição:** *Autentica Profissional*<br>
 **Ator:** Recepção<br>
 **Fluxo normal:**<br>
 1 - Chamar paciente (Sublinhado) <br>
@@ -60,7 +60,7 @@
 > Enfermagem :health_worker:
 
 ***Chamar Paciente na lista de Não Atendidos**<br>
-**Pré-Condição:** *Autentica Profissional*
+**Pré-Condição:** *Autentica Profissional*<br>
 **Ator:** Enfermagem<br>
 **Fluxo normal:**<br>
 1 - Sistema Informa Lista de pacientes Não atendidos<br>
@@ -71,7 +71,7 @@
 
 
 ***Cadastrar prontuário**<br>
-**Pré-Condição:** *Autentica Profissional*
+**Pré-Condição:** *Autentica Profissional*<br>
 **Ator:** Enfermagem<br>
 **Fluxo normal:**<br>
 1 - Chamar Paciente na lista de Não Atendidos<br>
@@ -85,7 +85,7 @@
 2a - Novo prontuário deve ter característica única do dia*<br>
 
 ***Encaminhar Paciente**<br>
-**Pré-Condição:** *Autentica Profissional*
+**Pré-Condição:** *Autentica Profissional*<br>
 **Ator:** Enfermagem<br>
 **Fluxo normal:**<br>
 1 - Cadastrar Prontuário<br>
@@ -97,7 +97,7 @@
 > Medicina :medical_symbol:
 
 ***Chamar paciente na Lista de “Em atendimento”**<br>
-**Pré-Condição:** *Autentica Profissional*
+**Pré-Condição:** *Autentica Profissional*<br>
 **Ator:** Medicina<br>
 **Fluxo normal:**<br>
 1 - O médico acessa o sistema e seleciona a lista de pacientes que aguardam atendimento.<br>
@@ -108,7 +108,7 @@
 3a - Se houver algum imprevisto que impeça o atendimento imediato do paciente (por exemplo, a necessidade de realizar algum procedimento antes), o médico pode registrar essa informação no sistema e informar ao paciente o tempo estimado de espera.*
 
 ***Atualizar Prontuário**<br>
-**Pré-Condição:** *Autentica Profissional*
+**Pré-Condição:** *Autentica Profissional*<br>
 **Ator:** Medicina<br>
 **Fluxo normal:**<br>
 1 - O médico acessa o sistema e busca pelo prontuário do paciente que deseja atualizar.<br>
@@ -118,7 +118,7 @@
 1a - Caso o médico identifique algum problema no prontuário (por exemplo, informações incorretas ou incompletas), ele pode solicitar uma revisão do prontuário ou a correção dos dados necessários.*
 
 ****Concluir atendimento***<br>
-**Pré-Condição:** *Autentica Profissional*
+**Pré-Condição:** *Autentica Profissional*<br>
 **Ator:** Medicina<br>
 **Fluxo normal:**<br>
 1 - O médico acessa o sistema e verifica se todas as informações relevantes foram devidamente registradas no prontuário do paciente.<br>
