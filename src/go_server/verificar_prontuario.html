@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Buscar Prontuario</title>
+</head>
+<body>
+	<h1>Buscar Prontuario</h1>
+	<form>
+		<label for="patient_id"> ID do Paciente:</label>
+		<input type="text" id="patient_id" name="patient_id" required>
+		<br>
+		<button type="submit" id="submit-btn"> Buscar </button>
+	</form>
+</body>
+<script>
+    const baseurl = 'http://localhost:1323';
+    const patientID_Input = document.getElementById('patient_id');
+    const form = document.querySelector('form');
+    const submitButton = document.getElementById('submit-btn');
+
+    patientID_Input.addEventListener('input', () => {
+        form.method = 'GET'
+        const patientID = patientID_Input.value;
+        const actionUrl = `${baseurl}/patients/${patientID}/medical-records`;
+        form.action = actionUrl;
+    });
+
+    submitButton.addEventListener('click', () => {
+        form.submit();
+    });
+</script>
+
+</html>

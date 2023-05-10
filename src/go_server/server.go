@@ -1,0 +1,188 @@
+package main
+
+import (
+	"database/sql"
+	"fmt"
+	"net/http"
+
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
+)
+
+type Patient struct {
+	ID            int    `json:"id"`
+	Name          string `json:"name"`
+	CPF           string `json:"cpf"`
+	Date_Of_Birth string `json:"date_of_birth"`
+	Address       string `json:"address"`
+	Phone         string `json:"phone"`
+	Email         string `json:"email"`
+}
+
+type MedicalRecord struct {
+	ID            int    `json:"id"`
+	PatientID     string `json:"patient_id"`
+	Date          string `json:"date"`
+	Allergy       string `json:"allergy"`
+	MainComplaint string `json:"main_complaint"`
+	MedicalNote   string `json:"medical_note"`
+}
+
+func main() {
+	// Conectando-se ao banco de dados MySQL
+	db, err := sql.Open("mysql", "root:BDt#30_01@tcp(127.0.0.1:3306)/ubs_system_db")
+	if err != nil {
+		panic(err.Error())
+	}
+	fmt.Println("Conectado ao banco de dados com sucesso!")
+	defer db.Close()
+
+	// Criação de um objeto Echo
+	e := echo.New()
+
+	// Middleware para tratar erros
+	e.Use(middleware.Recover())
+
+	// Inicio servidor Echo
+	e.GET("/", func(c echo.Context) error {
+		return c.String(http.StatusOK, "Hello, World!")
+	})
+
+	//////////////////////////////////////////////////////////
+	// 		   CRIA PACIENTE NOVO NO BANCO DE DADOS         //
+	//////////////////////////////////////////////////////////
+
+	// Handler (Lida com as rotas) para criar um novo paciente
+	e.POST("/CreatePatient", func(c echo.Context) error {
+		// Passa o json data e o metodo bind para o objeto paciente
+		p := &Patient{
+			Name:          c.FormValue("name"),
+			CPF:           c.FormValue("cpf"),
+			Date_Of_Birth: c.FormValue("date_of_birth"),
+			Address:       c.FormValue("address"),
+			Phone:         c.FormValue("phone"),
+			Email:         c.FormValue("email"),
+		}
+		if err := c.Bind(p); err != nil {
+			return err
+		}
+
+		fmt.Println("Paciente sendo criado...")
+		fmt.Println("Informações do paciente: ", p.Name, p.CPF, p.Date_Of_Birth, p.Address, p.Phone, p.Email)
+
+		// Inserindo um novo paciente no banco de dados
+		// Exec aqui funciona para Insert, Update e Delete
+		res, err := db.Exec("INSERT INTO patient_data(name, cpf, date_of_birth, address, phone, email) VALUES (?, ?, ?, ?, ?, ?)",
+			p.Name, p.CPF, p.Date_Of_Birth, p.Address, p.Phone, p.Email)
+		if err != nil {
+			return err
+		}
+
+		// Obtendo o ID do paciente recém-criado
+		id, err := res.LastInsertId()
+		if err != nil {
+			return err
+		}
+
+		p.ID = int(id)
+		fmt.Println("ID do novo paciente: ", p.ID)
+		return c.String(http.StatusOK, "Paciente criado com sucesso!")
+	})
+
+	//////////////////////////////////////////////////////////
+	// 		   VERIFICAR PACIENTE NO BANDO DE DADOS         //
+	//////////////////////////////////////////////////////////
+
+	// Handler para buscar informações de um paciente
+	e.GET("/patient/:cpf", func(c echo.Context) error {
+		cpf := c.Param("cpf")
+		fmt.Println("Recebido CPF: ", cpf)
+		// Selecionando as informações de um paciente no banco de dados
+		row := db.QueryRow("SELECT * FROM patient_data WHERE cpf = ?", cpf)
+
+		fmt.Println("Query criada...")
+		p := new(Patient)
+		err := row.Scan(&p.ID, &p.Name, &p.CPF, &p.Date_Of_Birth, &p.Address, &p.Phone, &p.Email)
+		if err != nil {
+			return err
+		}
+
+		// Verificando se o paciente existe
+		if p.ID == 0 {
+			return c.JSON(http.StatusNotFound, "paciente não encontrado")
+		}
+
+		return c.JSON(http.StatusOK, p)
+	})
+
+	//////////////////////////////////////////////////////////
+	// CRIA NOVO PRONTUARIO PARA PACIENTE NO BANDO DE DADOS //
+	//////////////////////////////////////////////////////////
+
+	// Handler para criar um novo prontuário médico
+	e.POST("/medical-records", func(c echo.Context) error {
+		mr := &MedicalRecord{
+			PatientID:     c.FormValue("patient_id"),
+			Date:          c.FormValue("date"),
+			Allergy:       c.FormValue("allergy"),
+			MainComplaint: c.FormValue("main_complaint"),
+			MedicalNote:   c.FormValue("medical_note"),
+		}
+		if err := c.Bind(mr); err != nil {
+			return err
+		}
+
+		fmt.Println("Prontuario medico sendo criado para paciente de id: ", mr.PatientID)
+		fmt.Println("Informações do prontuario medico: ", mr.Date, mr.Allergy, mr.MainComplaint, mr.MedicalNote)
+
+		// Inserindo um novo prontuário médico no banco de dados
+		res, err := db.Exec("INSERT INTO medical_records(patient_id, date, allergy, complaint, medical_note) VALUES (?, ?, ?, ?, ?)", mr.PatientID, mr.Date, mr.Allergy, mr.MainComplaint, mr.MedicalNote)
+		if err != nil {
+			return err
+		}
+
+		mr_id, err := res.LastInsertId()
+		if err != nil {
+			return err
+		}
+
+		mr.ID = int(mr_id)
+		fmt.Println("ID do novo prontuario medico: ", mr.ID)
+		return c.JSON(http.StatusOK, "Prontuario medico criado com sucesso")
+	})
+
+	////////////////////////////////////////////////////////////////
+	//   VERIFICAR PRONTUARIO DO PACIENTE _X_ NO BANDO DE DADOS   //
+	////////////////////////////////////////////////////////////////
+
+	// Handler para buscar prontuários médicos de um paciente
+	e.GET("/patients/:id/medical-records", func(c echo.Context) error {
+
+		id := c.Param("id")
+		// Selecionando os prontuários médicos de um paciente no banco de dados
+		rows, err := db.Query("SELECT * FROM medical_records WHERE patient_id = ?", id)
+		if err != nil {
+			fmt.Println("Erro ao buscar prontuarios medicos do paciente de id: ", id)
+			return err
+		}
+		defer rows.Close()
+
+		fmt.Println("Prontuarios medicos do paciente de id: ", id)
+
+		mrs := []MedicalRecord{}
+		for rows.Next() {
+			mr := MedicalRecord{}
+			err := rows.Scan(&mr.ID, &mr.PatientID, &mr.Date, &mr.Allergy, &mr.MainComplaint, &mr.MedicalNote)
+			if err != nil {
+				return err
+			}
+			mrs = append(mrs, mr)
+		}
+
+		return c.JSON(http.StatusOK, mrs)
+	})
+
+	// Iniciando o servidor Echo
+	e.Logger.Fatal(e.Start(":1323"))
+}

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Criar Prontuário Médico</title>
+</head>
+<body>
+	<h1>Criar Prontuário Médico</h1>
+	<form method="POST" action="http://localhost:1323/medical-records">
+		<label for="patient_id">ID do Paciente:</label>
+		<input type="text" id="patient_id" name="patient_id" required>
+		<br>
+		<label for="date">Data:</label>
+		<input type="date" id="date" name="date" required>
+		<br>
+		<label for="allergy">Alergia:</label>
+		<input type="text" id="allergy" name="allergy">
+		<br>
+		<label for="complaint">Queixa Principal:</label>
+		<input type="text" id="main_complaint" name="main_complaint" required>
+		<br>
+		<label for="medical_note">Observação Médica:</label>
+		<textarea id="medical_note" name="medical_note"></textarea>
+		<br>
+		<button type="submit" id="submit-btn"> Criar </button>
+	</form>
+</body>
+</html>
