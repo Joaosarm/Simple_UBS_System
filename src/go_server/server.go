@@ -10,6 +10,25 @@ import (
 	"github.com/labstack/echo/middleware"
 )
 
+// STRUCT TO CREATE USERS
+type worker struct {
+	Username   string `json:"username"`
+	Password   string `json:"password"`
+	Department int    `json:"department"`
+}
+
+// STRUCT TO CHECK USER EXISTANCE AND PASSWORD
+type logIn struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+// STRUCT TO RETURN LOGIN DATA
+type logInReturningInfos struct {
+	Username   string `json:"username"`
+	Department int    `json:"department"`
+}
+
 type Patient struct {
 	ID            int    `json:"id"`
 	Name          string `json:"name"`
@@ -48,6 +67,53 @@ func main() {
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
+
+	//// CRIAÇÃO DE TICKET E ARRAYS DE TICKETS - PREFERENCIAL E REGULAR
+
+	ticket := 0
+
+	var preferentialTickets []int
+	var regularTickets []int
+
+	//////////////////////////////////////////////////////////
+	// 		   FUNÇOES DE ENVIO DE TICKET PARA BACK         //
+	//////////////////////////////////////////////////////////
+
+	//ENVIA REQUISIÇÃO DE NOVO TICKET - PREFERENCIAL
+	e.POST("/preferential-ticket", func(context echo.Context) error {
+
+		ticket = ticket + 1
+		preferentialTickets = append(preferentialTickets, ticket)
+
+		return context.JSON(http.StatusOK, ticket)
+	})
+
+	//ENVIA REQUISIÇÃO DE NOVO TICKET - PREFERENCIAL
+	e.POST("/regular-ticket", func(context echo.Context) error {
+
+		ticket = ticket + 1
+		regularTickets = append(regularTickets, ticket)
+
+		return context.JSON(http.StatusOK, ticket)
+	})
+
+	//////////////////////////////////////////////////////////
+	// 		   FUNÇOES DE RESGATE DE TICKETS DO BACK        //
+	//////////////////////////////////////////////////////////
+
+	// DEVOLVE ARRAY DE TICKETS - PREFERENCIAL
+	e.GET("/preferential-ticket", func(context echo.Context) error {
+		return context.JSON(http.StatusOK, preferentialTickets)
+	})
+
+	//DEVOLVE ARRAY DE TICKETS - REGULAR
+	e.GET("/regular-ticket", func(context echo.Context) error {
+		return context.JSON(http.StatusOK, regularTickets)
+	})
+
+	//////////////////////////////////////////////////////////
+	// 		   FUNÇOES PARA LIDAR COM USUARIOS.             //
+	//////////////////////////////////////////////////////////
 
 	//////////////////////////////////////////////////////////
 	// 		   CRIA PACIENTE NOVO NO BANCO DE DADOS         //
@@ -184,5 +250,5 @@ func main() {
 	})
 
 	// Iniciando o servidor Echo
-	e.Logger.Fatal(e.Start(":1323"))
+	e.Logger.Fatal(e.Start(":4000"))
 }
