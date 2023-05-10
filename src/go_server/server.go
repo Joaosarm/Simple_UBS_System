@@ -11,14 +11,18 @@ import (
 	_ "github.com/lib/pq"
 )
 
-//INFOS PARA POSTGRES
-// const (
-// 	host     = "localhost"
-// 	port     = 5432
-// 	user     = "postgres"
-// 	password = "postgres"
-// 	dbname   = "ubs"
-// )
+// INFOS PARA POSTGRES
+const (
+	host     = "localhost"
+	port     = 5432
+	user     = "postgres"
+	password = "postgres"
+	dbname   = "ubs"
+)
+
+type recieveTicket struct {
+	Ticket int `json:"ticket"`
+}
 
 // STRUCT TO CREATE USERS
 type worker struct {
@@ -40,13 +44,14 @@ type logInReturningInfos struct {
 }
 
 type Patient struct {
-	ID            int    `json:"id"`
+	Id            int    `json:"id"`
 	Name          string `json:"name"`
-	CPF           string `json:"cpf"`
+	Cpf           string `json:"cpf"`
 	Date_Of_Birth string `json:"date_of_birth"`
 	Address       string `json:"address"`
 	Phone         string `json:"phone"`
 	Email         string `json:"email"`
+	Status        int    `json:"status"`
 }
 
 type MedicalRecord struct {
@@ -58,34 +63,38 @@ type MedicalRecord struct {
 	MedicalNote   string `json:"medical_note"`
 }
 
+func RemoveIndex(s []int, index int) []int {
+	return append(s[:index], s[index+1:]...)
+}
+
 func main() {
 	// Conectando-se ao banco de dados MySQL
-	db, err := sql.Open("mysql", "root:BDt#30_01@tcp(127.0.0.1:3306)/ubs_system_db")
-	if err != nil {
-		panic(err.Error())
-	}
-	fmt.Println("Conectado ao banco de dados com sucesso!")
-	defer db.Close()
+	// db, err := sql.Open("mysql", "root:BDt#30_01@tcp(127.0.0.1:3306)/ubs_system_db")
+	// if err != nil {
+	// 	panic(err.Error())
+	// }
+	// fmt.Println("Conectado ao banco de dados com sucesso!")
+	// defer db.Close()
 
 	//===============================
 	// Conectando-se ao banco de dados Postgres
 
-	// psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
-	// 	"password=%s dbname=%s sslmode=disable",
-	// 	host, port, user, password, dbname)
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
+		"password=%s dbname=%s sslmode=disable",
+		host, port, user, password, dbname)
 
-	// db, err := sql.Open("postgres", psqlInfo)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// defer db.Close()
+	db, err := sql.Open("postgres", psqlInfo)
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
 
-	// err = db.Ping()
-	// if err != nil {
-	// 	panic(err)
-	// }
+	err = db.Ping()
+	if err != nil {
+		panic(err)
+	}
 
-	// fmt.Println("Successfully connected!")
+	fmt.Println("Successfully connected!")
 
 	//============================
 
@@ -94,6 +103,9 @@ func main() {
 
 	// Middleware para tratar erros
 	e.Use(middleware.Recover())
+
+	// CORS
+	e.Use(middleware.CORS())
 
 	// Inicio servidor Echo
 	e.GET("/", func(c echo.Context) error {
@@ -143,6 +155,28 @@ func main() {
 		return context.JSON(http.StatusOK, regularTickets)
 	})
 
+	e.PUT("/ticket", func(context echo.Context) error {
+		var newTicket recieveTicket
+
+		context.Bind(&newTicket)
+
+		for i := 0; i < (len(regularTickets)); i++ {
+			if regularTickets[i] == newTicket.Ticket {
+				regularTickets = RemoveIndex(regularTickets, i)
+			}
+		}
+
+		for i := 0; i < (len(preferentialTickets)); i++ {
+			if preferentialTickets[i] == newTicket.Ticket {
+				preferentialTickets = RemoveIndex(preferentialTickets, i)
+			}
+		}
+
+		fmt.Print(regularTickets)
+
+		return context.NoContent(http.StatusOK)
+	})
+
 	//////////////////////////////////////////////////////////
 	// 		   FUNÇOES PARA LIDAR COM USUARIOS.             //
 	//////////////////////////////////////////////////////////
@@ -155,7 +189,7 @@ func main() {
 
 		sqlStatement := `
 		INSERT INTO users (username, password, department)
-		VALUES (?, ?, ?)`
+		VALUES ($1, $2, $3)`
 
 		_, err = db.Exec(sqlStatement, newUser.Username, newUser.Password, newUser.Department)
 		if err != nil {
@@ -174,9 +208,10 @@ func main() {
 
 		context.Bind(&newLogIn)
 
-		row := db.QueryRow("SELECT username, password, department FROM users WHERE username= ?", newLogIn.Username)
+		row := db.QueryRow("SELECT username, password, department FROM users WHERE username= $1", newLogIn.Username)
 
 		row.Scan(&username, &password, &department)
+
 		if row == nil || password != newLogIn.Password {
 			return context.NoContent(400)
 		}
@@ -195,7 +230,7 @@ func main() {
 		// Passa o json data e o metodo bind para o objeto paciente
 		p := &Patient{
 			Name:          c.FormValue("name"),
-			CPF:           c.FormValue("cpf"),
+			Cpf:           c.FormValue("cpf"),
 			Date_Of_Birth: c.FormValue("date_of_birth"),
 			Address:       c.FormValue("address"),
 			Phone:         c.FormValue("phone"),
@@ -206,24 +241,25 @@ func main() {
 		}
 
 		fmt.Println("Paciente sendo criado...")
-		fmt.Println("Informações do paciente: ", p.Name, p.CPF, p.Date_Of_Birth, p.Address, p.Phone, p.Email)
+		fmt.Println("Informações do paciente: ", p.Name, p.Cpf, p.Date_Of_Birth, p.Address, p.Phone, p.Email)
 
 		// Inserindo um novo paciente no banco de dados
 		// Exec aqui funciona para Insert, Update e Delete
-		res, err := db.Exec("INSERT INTO patient_data(name, cpf, date_of_birth, address, phone, email) VALUES (?, ?, ?, ?, ?, ?)",
-			p.Name, p.CPF, p.Date_Of_Birth, p.Address, p.Phone, p.Email)
+		_, err := db.Exec("INSERT INTO patient_data(name, cpf, date_of_birth, address, phone, email, status) VALUES ($1, $2, $3, $4, $5, $6, 1)",
+			p.Name, p.Cpf, p.Date_Of_Birth, p.Address, p.Phone, p.Email)
+
 		if err != nil {
 			return err
 		}
 
 		// Obtendo o ID do paciente recém-criado
-		id, err := res.LastInsertId()
-		if err != nil {
-			return err
-		}
+		// id, err := res.LastInsertId()
+		// if err != nil {
+		// 	return err
+		// }
 
-		p.ID = int(id)
-		fmt.Println("ID do novo paciente: ", p.ID)
+		// p.ID = int(id)
+		// fmt.Println("ID do novo paciente: ", p.ID)
 		return c.String(http.StatusOK, "Paciente criado com sucesso!")
 	})
 
@@ -233,20 +269,23 @@ func main() {
 
 	// Handler para buscar informações de um paciente
 	e.GET("/patient/:cpf", func(c echo.Context) error {
+
 		cpf := c.Param("cpf")
 		fmt.Println("Recebido CPF: ", cpf)
 		// Selecionando as informações de um paciente no banco de dados
-		row := db.QueryRow("SELECT * FROM patient_data WHERE cpf = ?", cpf)
+		row := db.QueryRow("SELECT * FROM patient_data WHERE cpf = $1", cpf)
 
 		fmt.Println("Query criada...")
-		p := new(Patient)
-		err := row.Scan(&p.ID, &p.Name, &p.CPF, &p.Date_Of_Birth, &p.Address, &p.Phone, &p.Email)
+		// p := new(Patient)
+		var p Patient
+		err := row.Scan(&p.Id, &p.Name, &p.Cpf, &p.Date_Of_Birth, &p.Address, &p.Phone, &p.Email, &p.Status)
+
 		if err != nil {
 			return err
 		}
 
 		// Verificando se o paciente existe
-		if p.ID == 0 {
+		if p.Id == 0 {
 			return c.JSON(http.StatusNotFound, "paciente não encontrado")
 		}
 
@@ -274,7 +313,7 @@ func main() {
 		fmt.Println("Informações do prontuario medico: ", mr.Date, mr.Allergy, mr.MainComplaint, mr.MedicalNote)
 
 		// Inserindo um novo prontuário médico no banco de dados
-		res, err := db.Exec("INSERT INTO medical_records(patient_id, date, allergy, complaint, medical_note) VALUES (?, ?, ?, ?, ?)", mr.PatientID, mr.Date, mr.Allergy, mr.MainComplaint, mr.MedicalNote)
+		res, err := db.Exec("INSERT INTO medical_records(patient_id, date, allergy, complaint, medical_note) VALUES ($1, $2, $3, $4, $5)", mr.PatientID, mr.Date, mr.Allergy, mr.MainComplaint, mr.MedicalNote)
 		if err != nil {
 			return err
 		}
@@ -298,7 +337,7 @@ func main() {
 
 		id := c.Param("id")
 		// Selecionando os prontuários médicos de um paciente no banco de dados
-		rows, err := db.Query("SELECT * FROM medical_records WHERE patient_id = ?", id)
+		rows, err := db.Query("SELECT * FROM medical_records WHERE patient_id = $1", id)
 		if err != nil {
 			fmt.Println("Erro ao buscar prontuarios medicos do paciente de id: ", id)
 			return err
@@ -318,6 +357,36 @@ func main() {
 		}
 
 		return c.JSON(http.StatusOK, mrs)
+	})
+
+	////////////////////////////////////////////////////////////////
+	//                 BUSCAR PACIENTES POR ETAPA.                //
+	////////////////////////////////////////////////////////////////
+
+	// Handler para buscar pacientes
+	e.GET("/patients/waiting/:id", func(c echo.Context) error {
+
+		id := c.Param("id")
+		// Selecionando os pacientes de acordo com a etapa
+		rows, err := db.Query("SELECT name FROM patient_data WHERE status = $1", id)
+		if err != nil {
+			fmt.Println("Erro ao buscar pacientes ")
+			return err
+		}
+		defer rows.Close()
+
+		patients := []string{}
+
+		for rows.Next() {
+			var name string
+			err := rows.Scan(&name)
+			if err != nil {
+				return err
+			}
+			patients = append(patients, name)
+		}
+
+		return c.JSON(http.StatusOK, patients)
 	})
 
 	// Iniciando o servidor Echo
