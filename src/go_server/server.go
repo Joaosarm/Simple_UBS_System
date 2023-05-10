@@ -8,7 +8,17 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+	_ "github.com/lib/pq"
 )
+
+//INFOS PARA POSTGRES
+// const (
+// 	host     = "localhost"
+// 	port     = 5432
+// 	user     = "postgres"
+// 	password = "postgres"
+// 	dbname   = "ubs"
+// )
 
 // STRUCT TO CREATE USERS
 type worker struct {
@@ -56,6 +66,28 @@ func main() {
 	}
 	fmt.Println("Conectado ao banco de dados com sucesso!")
 	defer db.Close()
+
+	//===============================
+	// Conectando-se ao banco de dados Postgres
+
+	// psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
+	// 	"password=%s dbname=%s sslmode=disable",
+	// 	host, port, user, password, dbname)
+
+	// db, err := sql.Open("postgres", psqlInfo)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// defer db.Close()
+
+	// err = db.Ping()
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	// fmt.Println("Successfully connected!")
+
+	//============================
 
 	// Criação de um objeto Echo
 	e := echo.New()
@@ -114,6 +146,45 @@ func main() {
 	//////////////////////////////////////////////////////////
 	// 		   FUNÇOES PARA LIDAR COM USUARIOS.             //
 	//////////////////////////////////////////////////////////
+
+	//CRIA NOVO USUÁRIO
+	e.POST("/new-user", func(context echo.Context) error {
+		var newUser worker
+
+		context.Bind(&newUser)
+
+		sqlStatement := `
+		INSERT INTO users (username, password, department)
+		VALUES (?, ?, ?)`
+
+		_, err = db.Exec(sqlStatement, newUser.Username, newUser.Password, newUser.Department)
+		if err != nil {
+			return err
+		}
+
+		return context.NoContent(201)
+	})
+
+	//PROCURA USUÁRIO E CHECA SE A SENHA ESTA CORRETA
+	e.POST("/log-in", func(context echo.Context) error {
+		var newLogIn logIn
+		var username string
+		var password string
+		var department int
+
+		context.Bind(&newLogIn)
+
+		row := db.QueryRow("SELECT username, password, department FROM users WHERE username= ?", newLogIn.Username)
+
+		row.Scan(&username, &password, &department)
+		if row == nil || password != newLogIn.Password {
+			return context.NoContent(400)
+		}
+
+		logInReturn := &logInReturningInfos{username, department}
+
+		return context.JSON(http.StatusOK, logInReturn)
+	})
 
 	//////////////////////////////////////////////////////////
 	// 		   CRIA PACIENTE NOVO NO BANCO DE DADOS         //
