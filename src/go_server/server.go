@@ -56,7 +56,7 @@ type Patient struct {
 
 type MedicalRecord struct {
 	ID            int    `json:"id"`
-	PatientID     string `json:"patient_id"`
+	PatientName   string `json:"patient_name"`
 	Date          string `json:"date"`
 	Allergy       string `json:"allergy"`
 	MainComplaint string `json:"main_complaint"`
@@ -299,7 +299,7 @@ func main() {
 	// Handler para criar um novo prontuário médico
 	e.POST("/medical-records", func(c echo.Context) error {
 		mr := &MedicalRecord{
-			PatientID:     c.FormValue("patient_id"),
+			PatientName:   c.FormValue("patient_name"),
 			Date:          c.FormValue("date"),
 			Allergy:       c.FormValue("allergy"),
 			MainComplaint: c.FormValue("main_complaint"),
@@ -309,22 +309,20 @@ func main() {
 			return err
 		}
 
-		fmt.Println("Prontuario medico sendo criado para paciente de id: ", mr.PatientID)
+		fmt.Println("Prontuario medico sendo criado para paciente ", mr.PatientName)
 		fmt.Println("Informações do prontuario medico: ", mr.Date, mr.Allergy, mr.MainComplaint, mr.MedicalNote)
 
 		// Inserindo um novo prontuário médico no banco de dados
-		res, err := db.Exec("INSERT INTO medical_records(patient_id, date, allergy, complaint, medical_note) VALUES ($1, $2, $3, $4, $5)", mr.PatientID, mr.Date, mr.Allergy, mr.MainComplaint, mr.MedicalNote)
+		_, err := db.Exec("INSERT INTO medical_records (patient_name, date, allergy, main_complaint, medical_note) VALUES ($1, $2, $3, $4, $5)", mr.PatientName, mr.Date, mr.Allergy, mr.MainComplaint, mr.MedicalNote)
 		if err != nil {
 			return err
 		}
 
-		mr_id, err := res.LastInsertId()
+		_, err = db.Exec("UPDATE patient_data SET status=2 WHERE patient_data.name = $1", mr.PatientName)
 		if err != nil {
 			return err
 		}
 
-		mr.ID = int(mr_id)
-		fmt.Println("ID do novo prontuario medico: ", mr.ID)
 		return c.JSON(http.StatusOK, "Prontuario medico criado com sucesso")
 	})
 
@@ -349,7 +347,7 @@ func main() {
 		mrs := []MedicalRecord{}
 		for rows.Next() {
 			mr := MedicalRecord{}
-			err := rows.Scan(&mr.ID, &mr.PatientID, &mr.Date, &mr.Allergy, &mr.MainComplaint, &mr.MedicalNote)
+			err := rows.Scan(&mr.ID, &mr.PatientName, &mr.Date, &mr.Allergy, &mr.MainComplaint, &mr.MedicalNote)
 			if err != nil {
 				return err
 			}
